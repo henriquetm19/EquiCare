@@ -1,0 +1,167 @@
+-- 01_schema.sql
+-- Criação do banco e das tabelas do projeto EquiCare
+
+-- (Opcional) criar o banco:
+-- CREATE DATABASE equicare;
+-- \c equicare;    -- no psql
+
+DROP TABLE IF EXISTS parto CASCADE;
+DROP TABLE IF EXISTS diagnostico_gestacao CASCADE;
+DROP TABLE IF EXISTS procedimento_reprodutivo CASCADE;
+DROP TABLE IF EXISTS exame_reprodutivo CASCADE;
+DROP TABLE IF EXISTS ciclo_estral CASCADE;
+DROP TABLE IF EXISTS animal CASCADE;
+DROP TABLE IF EXISTS proprietario CASCADE;
+DROP TABLE IF EXISTS veterinario CASCADE;
+
+CREATE TABLE veterinario (
+    id_veterinario   INT PRIMARY KEY,
+    nome             VARCHAR(100) NOT NULL,
+    crmv             VARCHAR(20)  NOT NULL,
+    telefone         VARCHAR(20),
+    email            VARCHAR(100)
+);
+
+CREATE TABLE proprietario (
+    id_proprietario  INT PRIMARY KEY,
+    nome             VARCHAR(100) NOT NULL,
+    nome_haras       VARCHAR(100),
+    telefone         VARCHAR(20),
+    email            VARCHAR(100),
+    endereco         VARCHAR(200)
+);
+
+CREATE TABLE animal (
+    id_animal        INT PRIMARY KEY,
+    nome             VARCHAR(100) NOT NULL,
+    sexo             CHAR(1)      NOT NULL,  -- 'M' ou 'F'
+    categoria        VARCHAR(20)  NOT NULL,  -- 'Égua', 'Garanhão', 'Potro'
+    raca             VARCHAR(50),
+    data_nascimento  DATE,
+    id_proprietario  INT NOT NULL,
+    CONSTRAINT fk_animal_proprietario
+        FOREIGN KEY (id_proprietario)
+        REFERENCES proprietario (id_proprietario)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT
+);
+
+CREATE TABLE ciclo_estral (
+    id_ciclo         INT PRIMARY KEY,
+    id_animal        INT NOT NULL,
+    data_inicio      DATE NOT NULL,
+    data_fim         DATE,
+    status           VARCHAR(20),
+    observacoes      TEXT,
+    CONSTRAINT fk_ciclo_animal
+        FOREIGN KEY (id_animal)
+        REFERENCES animal (id_animal)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+);
+
+CREATE TABLE exame_reprodutivo (
+    id_exame         INT PRIMARY KEY,
+    id_animal        INT NOT NULL,
+    id_veterinario   INT NOT NULL,
+    id_ciclo         INT,
+    data_exame       DATE NOT NULL,
+    tipo_exame       VARCHAR(30) NOT NULL,
+    foliculo_mm      DECIMAL(5,2),
+    corpo_luteo      BOOLEAN,
+    resultado_geral  VARCHAR(50),
+    observacoes      TEXT,
+    CONSTRAINT fk_exame_animal
+        FOREIGN KEY (id_animal)
+        REFERENCES animal (id_animal)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    CONSTRAINT fk_exame_vet
+        FOREIGN KEY (id_veterinario)
+        REFERENCES veterinario (id_veterinario)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT,
+    CONSTRAINT fk_exame_ciclo
+        FOREIGN KEY (id_ciclo)
+        REFERENCES ciclo_estral (id_ciclo)
+        ON UPDATE CASCADE
+        ON DELETE SET NULL
+);
+
+CREATE TABLE procedimento_reprodutivo (
+    id_procedimento  INT PRIMARY KEY,
+    id_animal        INT NOT NULL,   -- égua
+    id_veterinario   INT NOT NULL,
+    id_ciclo         INT,
+    id_garanhao      INT,
+    tipo_procedimento VARCHAR(30) NOT NULL,
+    data_procedimento DATE NOT NULL,
+    observacoes      TEXT,
+    CONSTRAINT fk_proc_egua
+        FOREIGN KEY (id_animal)
+        REFERENCES animal (id_animal)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    CONSTRAINT fk_proc_vet
+        FOREIGN KEY (id_veterinario)
+        REFERENCES veterinario (id_veterinario)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT,
+    CONSTRAINT fk_proc_ciclo
+        FOREIGN KEY (id_ciclo)
+        REFERENCES ciclo_estral (id_ciclo)
+        ON UPDATE CASCADE
+        ON DELETE SET NULL,
+    CONSTRAINT fk_proc_garanhao
+        FOREIGN KEY (id_garanhao)
+        REFERENCES animal (id_animal)
+        ON UPDATE CASCADE
+        ON DELETE SET NULL
+);
+
+CREATE TABLE diagnostico_gestacao (
+    id_diagnostico   INT PRIMARY KEY,
+    id_animal        INT NOT NULL,
+    id_veterinario   INT NOT NULL,
+    id_procedimento  INT NOT NULL,
+    data_diagnostico DATE NOT NULL,
+    dias_pos_cobertura INT NOT NULL,
+    resultado        VARCHAR(20) NOT NULL, -- 'prenhe', 'vazia', ...
+    observacoes      TEXT,
+    CONSTRAINT fk_diag_animal
+        FOREIGN KEY (id_animal)
+        REFERENCES animal (id_animal)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    CONSTRAINT fk_diag_vet
+        FOREIGN KEY (id_veterinario)
+        REFERENCES veterinario (id_veterinario)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT,
+    CONSTRAINT fk_diag_proc
+        FOREIGN KEY (id_procedimento)
+        REFERENCES procedimento_reprodutivo (id_procedimento)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+);
+
+CREATE TABLE parto (
+    id_parto         INT PRIMARY KEY,
+    id_animal_mae    INT NOT NULL,
+    id_veterinario   INT NOT NULL,
+    data_parto       DATE NOT NULL,
+    resultado_parto  VARCHAR(30),
+    sexo_potro       CHAR(1),
+    peso_potro       DECIMAL(5,2),
+    observacoes      TEXT,
+    CONSTRAINT fk_parto_mae
+        FOREIGN KEY (id_animal_mae)
+        REFERENCES animal (id_animal)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    CONSTRAINT fk_parto_vet
+        FOREIGN KEY (id_veterinario)
+        REFERENCES veterinario (id_veterinario)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT
+);
