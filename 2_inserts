@@ -1,0 +1,51 @@
+-- 02_inserts.sql
+-- Inserção de dados de exemplo para o EquiCare
+
+-- VETERINARIO
+INSERT INTO veterinario (id_veterinario, nome, crmv, telefone, email) VALUES
+(1, 'Dra. Ana Cavalcanti', 'CRMV-12345', '(51) 99999-1111', 'ana@equicare.com'),
+(2, 'Dr. Bruno Silveira',   'CRMV-67890', '(51) 98888-2222', 'bruno@equicare.com');
+
+-- PROPRIETARIO
+INSERT INTO proprietario (id_proprietario, nome, nome_haras, telefone, email, endereco) VALUES
+(1, 'João Pereira',      'Haras Estrela do Sul', '(51) 97777-3333', 'joao@harasestrela.com', 'Estrada Rural, km 12'),
+(2, 'Fazenda Bela Vista','Haras Bela Vista',     '(51) 96666-4444', 'contato@belavista.com', 'Linha Campo Alto, s/n');
+
+-- ANIMAL (Éguas, Garanhão, Potro)
+INSERT INTO animal (id_animal, nome, sexo, categoria, raca, data_nascimento, id_proprietario) VALUES
+(1, 'Lua Branca',    'F', 'Égua',     'Mangalarga', '2018-09-10', 1),
+(2, 'Princesa do Sul','F','Égua',     'Crioula',    '2017-11-05', 1),
+(3, 'Trovão Negro',  'M', 'Garanhão', 'Puro Sangue','2015-03-20', 2),
+(4, 'Sol Nascente',  'M', 'Potro',    'Mangalarga', '2025-08-03', 1); -- para vincular com parto depois
+
+-- CICLO_ESTRAL (apenas para as éguas 1 e 2)
+INSERT INTO ciclo_estral (id_ciclo, id_animal, data_inicio, data_fim, status, observacoes) VALUES
+(1, 1, '2025-07-01', '2025-07-25', 'concluído', 'Ciclo acompanhado até ovulação.'),
+(2, 2, '2025-07-05', NULL,         'em andamento', 'Aguardando ovulação.');
+
+-- EXAME_REPRODUTIVO
+INSERT INTO exame_reprodutivo
+(id_exame, id_animal, id_veterinario, id_ciclo, data_exame, tipo_exame, foliculo_mm, corpo_luteo, resultado_geral, observacoes)
+VALUES
+(1, 1, 1, 1, '2025-07-10', 'ultrassom', 32.5, FALSE, 'Fase folicular', 'Folículo dominante em OD.'),
+(2, 1, 1, 1, '2025-07-14', 'ultrassom', 38.0, FALSE, 'Próxima à ovulação', 'Recomendada inseminação.'),
+(3, 2, 2, 2, '2025-07-15', 'palpação',  NULL, FALSE, 'Avaliação inicial', 'Útero em bom tônus.');
+
+-- PROCEDIMENTO_REPRODUTIVO (inseminação / cobertura da égua 1 com garanhão 3)
+INSERT INTO procedimento_reprodutivo
+(id_procedimento, id_animal, id_veterinario, id_ciclo, id_garanhao, tipo_procedimento, data_procedimento, observacoes)
+VALUES
+(1, 1, 1, 1, 3, 'inseminacao', '2025-07-15', 'Inseminação com sêmen resfriado de Trovão Negro.');
+
+-- DIAGNOSTICO_GESTACAO (D14, D30)
+INSERT INTO diagnostico_gestacao
+(id_diagnostico, id_animal, id_veterinario, id_procedimento, data_diagnostico, dias_pos_cobertura, resultado, observacoes)
+VALUES
+(1, 1, 1, 1, '2025-07-29', 14, 'prenhe', 'Vesícula embrionária única.'),
+(2, 1, 1, 1, '2025-08-14', 30, 'prenhe', 'Embrião viável, batimentos cardíacos presentes.');
+
+-- PARTO (é uma simulação futura associada ao potro 4 e à égua 1)
+INSERT INTO parto
+(id_parto, id_animal_mae, id_veterinario, data_parto, resultado_parto, sexo_potro, peso_potro, observacoes)
+VALUES
+(1, 1, 1, '2026-06-20', 'normal', 'M', 47.3, 'Parto sem complicações. Potro registrado como Sol Nascente.');
