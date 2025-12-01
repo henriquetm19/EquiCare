@@ -1,0 +1,71 @@
+-- 03_selects.sql
+-- Consultas de exemplo no banco EquiCare
+
+-- 1) Listar todas as éguas cadastradas com seu proprietário
+SELECT
+    a.id_animal,
+    a.nome        AS nome_egua,
+    p.nome        AS proprietario,
+    p.nome_haras
+FROM animal a
+JOIN proprietario p ON p.id_proprietario = a.id_proprietario
+WHERE a.categoria = 'Égua'
+ORDER BY p.nome, a.nome;
+
+
+-- 2) Buscar exames reprodutivos da égua "Lua Branca", em ordem cronológica
+SELECT
+    e.id_exame,
+    e.data_exame,
+    e.tipo_exame,
+    e.foliculo_mm,
+    e.resultado_geral,
+    v.nome AS veterinario
+FROM exame_reprodutivo e
+JOIN animal a       ON a.id_animal = e.id_animal
+JOIN veterinario v  ON v.id_veterinario = e.id_veterinario
+WHERE a.nome = 'Lua Branca'
+ORDER BY e.data_exame;
+
+
+-- 3) Consultar todos os diagnósticos de gestação com resultado "prenhe"
+SELECT
+    d.id_diagnostico,
+    a.nome           AS egua,
+    v.nome           AS veterinario,
+    d.data_diagnostico,
+    d.dias_pos_cobertura,
+    d.resultado
+FROM diagnostico_gestacao d
+JOIN animal a      ON a.id_animal = d.id_animal
+JOIN veterinario v ON v.id_veterinario = d.id_veterinario
+WHERE d.resultado = 'prenhe'
+ORDER BY d.data_diagnostico DESC;
+
+
+-- 4) Listar os procedimentos reprodutivos mostrando égua e garanhão
+SELECT
+    pr.id_procedimento,
+    egua.nome      AS egua,
+    gar.nome       AS garanhao,
+    pr.tipo_procedimento,
+    pr.data_procedimento,
+    v.nome         AS veterinario
+FROM procedimento_reprodutivo pr
+JOIN animal egua ON egua.id_animal = pr.id_animal
+LEFT JOIN animal gar ON gar.id_animal = pr.id_garanhao
+JOIN veterinario v   ON v.id_veterinario = pr.id_veterinario
+ORDER BY pr.data_procedimento;
+
+
+-- 5) (Exemplo com LIMIT) Próximos 3 últimos exames cadastrados
+SELECT
+    e.id_exame,
+    a.nome        AS animal,
+    e.data_exame,
+    e.tipo_exame,
+    e.resultado_geral
+FROM exame_reprodutivo e
+JOIN animal a ON a.id_animal = e.id_animal
+ORDER BY e.data_exame DESC
+LIMIT 3;
