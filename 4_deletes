@@ -1,0 +1,51 @@
+-- 04_updates_deletes.sql
+-- Exemplos de UPDATE e DELETE no banco EquiCare
+
+---------------------------------------------------------
+-- UPDATES
+---------------------------------------------------------
+
+-- 1) Corrigir telefone de um proprietário
+UPDATE proprietario
+SET telefone = '(51) 95555-0000'
+WHERE id_proprietario = 1;
+
+
+-- 2) Atualizar o status de um ciclo estral para "concluído"
+UPDATE ciclo_estral
+SET status = 'concluído',
+    data_fim = '2025-07-30'
+WHERE id_ciclo = 2;
+
+
+-- 3) Ajustar o peso do potro no registro de parto
+UPDATE parto
+SET peso_potro = 48.0
+WHERE id_parto = 1;
+
+
+---------------------------------------------------------
+-- DELETES
+---------------------------------------------------------
+-- ATENÇÃO: excluir na ordem correta para não violar FK
+
+-- 1) Remover um diagnóstico de gestação específico (erro de lançamento)
+DELETE FROM diagnostico_gestacao
+WHERE id_diagnostico = 2;
+
+
+-- 2) Remover um exame reprodutivo registrado equivocadamente
+DELETE FROM exame_reprodutivo
+WHERE id_exame = 3;
+
+
+-- 3) Excluir um procedimento reprodutivo de teste, junto com seus diagnósticos
+-- Primeiro exclui diagnósticos que dependem dele:
+DELETE FROM diagnostico_gestacao
+WHERE id_procedimento = 1
+  AND dias_pos_cobertura = 30;  -- só o D30, por exemplo
+
+-- Depois, se necessário, excluir o próprio procedimento:
+-- (cuidado: se houver outros diagnósticos vinculados, o ON DELETE CASCADE pode apagar tudo)
+-- DELETE FROM procedimento_reprodutivo
+-- WHERE id_procedimento = 1;
